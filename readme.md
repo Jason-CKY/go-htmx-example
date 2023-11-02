@@ -43,3 +43,7 @@ make initialize-db
 ## Format on save
 
 Refer to this [link](https://www.digitalocean.com/community/tutorials/how-to-format-code-with-prettier-in-visual-studio-code) on how to install and set prettier to format on save.
+
+## Syntax highlighting of golang template files on vscode
+
+* Download [go-template](https://marketplace.visualstudio.com/items?itemName=jinliming2.vscode-go-template) vscode extension for template syntax highlighting

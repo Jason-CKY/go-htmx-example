@@ -1,31 +1,17 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
-	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"time"
 
+	"github.com/Jason-CKY/htmx-todo-app/handlers"
 	"github.com/gin-gonic/gin"
-	"github.com/mroth/weightedrand/v2"
 	log "github.com/sirupsen/logrus"
 )
 
-var (
-	// Config
-	routingFilePath  string = "routing.json"
-	weightedChoosers map[string]*weightedrand.Chooser[string, int]
-)
-
-type RoutingRule map[string][]Upstream
-
-type Upstream struct {
-	Url    string `json:"url"`
-	Weight int    `json:"weight"`
-}
+var directusHost = ""
 
 func LookupEnvOrString(key string, defaultValue string) string {
 	envVariable, exists := os.LookupEnv(key)
@@ -35,48 +21,8 @@ func LookupEnvOrString(key string, defaultValue string) string {
 	return envVariable
 }
 
-func readConfig(fpath string) map[string]*weightedrand.Chooser[string, int] {
-	file, err := os.Open(fpath)
-	if err != nil {
-		log.Errorf("%v", err)
-	}
-	defer file.Close()
-	byteValue, readErr := io.ReadAll(file)
-	if readErr != nil {
-		log.Errorf("%v", readErr)
-	}
-	var routingRules map[string]RoutingRule
-	json.Unmarshal(byteValue, &routingRules)
-
-	weightedChoosers := map[string]*weightedrand.Chooser[string, int]{}
-
-	for prefix, routingRule := range routingRules {
-		var weightedChoices []weightedrand.Choice[string, int]
-
-		for i := 0; i < len(routingRule["upstreams"]); i++ {
-			upstream := routingRule["upstreams"][i]
-			weightedChoices = append(weightedChoices, weightedrand.NewChoice(upstream.Url, upstream.Weight))
-		}
-		weightedChoosers[prefix], _ = weightedrand.NewChooser(weightedChoices...)
-	}
-
-	return weightedChoosers
-}
-
-func resolveUrl(c *gin.Context) {
-	prefix := "/" + c.Param("prefix")
-
-	chooser, ok := weightedChoosers[prefix]
-	if ok {
-		c.JSON(200, gin.H{"route": chooser.Pick()})
-	} else {
-		log.Errorf("Prefix not found in routing rules")
-		c.JSON(404, gin.H{"detail": fmt.Sprintf("%s does not exist in the routing rules", prefix)})
-	}
-}
-
 func main() {
-	flag.StringVar(&routingFilePath, "fpath", LookupEnvOrString("CONFIG_FPATH", routingFilePath), "Path to routing json file")
+	flag.StringVar(&directusHost, "fpath", LookupEnvOrString("directus_host", directusHost), "Path to routing json file")
 
 	flag.Parse()
 
@@ -86,11 +32,12 @@ func main() {
 		DisableLevelTruncation: true,
 	})
 
-	log.Infof("Reading routing file at %s", routingFilePath)
-	weightedChoosers = readConfig(routingFilePath)
-
+	log.Infof("connecting to directus at: %v", directusHost)
 	router := gin.Default()
-	router.GET("/:prefix", resolveUrl)
+	router.LoadHTMLGlob("templates/*")
+
+	router.GET("/", handlers.HomePage)
+	router.Static("/static", "./static")
 	s := &http.Server{
 		Addr:           ":8080",
 		Handler:        router,

@@ -15,24 +15,11 @@ lint:			## Lint check
 
 .PHONY: build-css
 build-css:		## use tailwind cli to build out output css
-	tailwindcss -i ./build/fastapi/input.css -o ./src/app/static/output.css
+	tailwindcss -i ./build/input.css -o ./src/app/static/output.css
 
 .PHONY: watch-css
 watch-css: 		## set css build into watch mode for development
-	tailwindcss -i ./build/fastapi/input.css -o ./src/app/static/output.css --watch
-
-.PHONY: format
-format:			## Format code in place to conform to lint check
-	docker run --rm -v $(PWD):/src:Z \
-	--workdir=/src odinuge/yapf:latest yapf \
-	--style '{based_on_style: pep8, dedent_closing_brackets: true, coalesce_brackets: true}' \
-	--no-local-style --verbose --recursive --in-place --parallel app
-
-.PHONY: pyflakes
-pyflakes:		## Pyflakes check for any unused variables/classes
-	docker run --rm -v $(PWD):/src:Z \
-	--workdir=/src python:3.8 \
-	/bin/bash -c "pip install --upgrade pyflakes && python -m pyflakes /src && echo 'pyflakes passed!'"
+	tailwindcss -i ./build/input.css -o ./src/app/static/output.css --watch
 
 .PHONY: build-dev
 build-dev:	build-css	## rebuild all the images in the docker-compose file
