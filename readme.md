@@ -44,6 +44,17 @@ make initialize-db
 
 Refer to this [link](https://www.digitalocean.com/community/tutorials/how-to-format-code-with-prettier-in-visual-studio-code) on how to install and set prettier to format on save.
 
-## Syntax highlighting of golang template files on vscode
+## VS-code extensions for good developer experience
 
-* Download [go-template](https://marketplace.visualstudio.com/items?itemName=jinliming2.vscode-go-template) vscode extension for template syntax highlighting
+* [Tailwind CSS IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss)
+
+### Syntax highlighting of golang template files on vscode
+
+* Download [templ-vscode](https://marketplace.visualstudio.com/items?itemName=a-h.templ) vscode extension for go-templ syntax highlighting
+* Add the following into your vscode `settings.json` to allow for tailwind syntax highlighting in your go `templ` files:
+
+```json
+"tailwindCSS.includeLanguages": {
+"templ": "html"
+}
+```

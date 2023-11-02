@@ -10,6 +10,11 @@ services:
       directus_host: http://directus:8055
     ports:
       - 8080:8080
+    entrypoint: ""
+    command:
+      - /bin/bash
+      - -c
+      - "go install github.com/a-h/templ/cmd/templ@latest && air -c .air.toml"
     volumes:
       - ./src/app:/app
 

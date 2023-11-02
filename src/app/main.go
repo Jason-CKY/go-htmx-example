@@ -2,12 +2,10 @@ package main
 
 import (
 	"flag"
-	"net/http"
 	"os"
-	"time"
 
-	"github.com/Jason-CKY/htmx-todo-app/handlers"
-	"github.com/gin-gonic/gin"
+	"github.com/Jason-CKY/htmx-todo-app/pkg/handlers"
+	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -33,17 +31,23 @@ func main() {
 	})
 
 	log.Infof("connecting to directus at: %v", directusHost)
-	router := gin.Default()
-	router.LoadHTMLGlob("templates/*")
 
-	router.GET("/", handlers.HomePage)
-	router.Static("/static", "./static")
-	s := &http.Server{
-		Addr:           ":8080",
-		Handler:        router,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
-	}
-	s.ListenAndServe()
+	e := echo.New()
+	e.Static("/static", "static")
+	e.GET("/", handlers.HomePage)
+
+	e.Logger.Fatal(e.Start(":8080"))
+	// router := gin.Default()
+	// router.LoadHTMLGlob("templates/*")
+
+	// router.GET("/", handlers.HomePage)
+	// router.Static("/static", "./static")
+	// s := &http.Server{
+	// 	Addr:           ":8080",
+	// 	Handler:        router,
+	// 	ReadTimeout:    10 * time.Second,
+	// 	WriteTimeout:   10 * time.Second,
+	// 	MaxHeaderBytes: 1 << 20,
+	// }
+	// s.ListenAndServe()
 }

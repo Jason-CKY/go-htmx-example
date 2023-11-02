@@ -6,3 +6,4 @@ node_modules
 
 src/app/tmp
 src/directus/database/data.db
+*_templ.go
