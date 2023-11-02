@@ -1,4 +1,17 @@
-FROM golang:1.21-alpine as build
+FROM cosmtrek/air:v1.49.0 as dev
+
+WORKDIR /app
+
+RUN go install github.com/a-h/templ/cmd/templ@latest
+
+FROM node:18-alpine as build-css
+
+WORKDIR /app
+COPY . .
+RUN npm ci && npx tailwindcss -i ./build/input.css -o /output.css
+
+
+FROM golang:1.21-alpine as production
 
 WORKDIR /app
 
@@ -8,14 +21,7 @@ COPY ./src/app/go.sum ./
 RUN go mod download
 
 COPY ./src/app ./
+COPY --from=build-css /output.css ./static/output.css
 
-RUN go build -o /htmx-todo-app
-
-FROM scratch as production
-
-WORKDIR /
-
-COPY --from=build /htmx-todo-app /htmx-todo-app
-
-EXPOSE 8080
-CMD [ "/htmx-todo-app" ]
+RUN go build -o /main
+CMD [ "/main" ]

@@ -15,11 +15,11 @@ lint:			## Lint check
 
 .PHONY: build-css
 build-css:		## use tailwind cli to build out output css
-	tailwindcss -i ./build/input.css -o ./src/app/static/output.css
+	npx tailwindcss -i ./build/input.css -o ./src/app/static/output.css
 
 .PHONY: watch-css
 watch-css: 		## set css build into watch mode for development
-	tailwindcss -i ./build/input.css -o ./src/app/static/output.css --watch
+	npx tailwindcss -i ./build/input.css -o ./src/app/static/output.css --watch
 
 .PHONY: build-dev
 build-dev:	build-css	## rebuild all the images in the docker-compose file

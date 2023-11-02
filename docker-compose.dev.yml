@@ -3,18 +3,16 @@ version: '3.7'
 services:
 
   htmx-server:
-    image: cosmtrek/air:v1.49.0
+    build:
+      context: .
+      dockerfile: ./build/Dockerfile
+      target: dev
     container_name: htmx
     working_dir: /app
     environment:
       directus_host: http://directus:8055
     ports:
       - 8080:8080
-    entrypoint: ""
-    command:
-      - /bin/bash
-      - -c
-      - "go install github.com/a-h/templ/cmd/templ@latest && air -c .air.toml"
     volumes:
       - ./src/app:/app
 
