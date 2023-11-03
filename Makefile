@@ -13,16 +13,24 @@ lint:			## Lint check
 	--style '{based_on_style: pep8, dedent_closing_brackets: true, coalesce_brackets: true}' \
 	--no-local-style --verbose --recursive --diff --parallel app
 
+.PHONY: install-deps
+install-deps:		## install all required node dependencies
+	npm ci && cd src/app && npm ci
+
 .PHONY: build-css
 build-css:		## use tailwind cli to build out output css
-	npx tailwindcss -i ./build/input.css -o ./src/app/static/output.css
+	cd src/app && npx tailwindcss -i ./input.css -o ./static/output.css
 
 .PHONY: watch-css
 watch-css: 		## set css build into watch mode for development
-	npx tailwindcss -i ./build/input.css -o ./src/app/static/output.css --watch
+	cd src.app && npx tailwindcss -i ./input.css -o ./static/output.css --watch
 
 .PHONY: build-dev
-build-dev:	build-css	## rebuild all the images in the docker-compose file
+local-dev:	local-dev	## starts golang application with live reload locally instead of with docker images
+	cd src/app && air
+
+.PHONY: build-dev
+build-dev:	build-dev	## rebuild all the images in the docker-compose file
 	docker-compose -f docker-compose.dev.yml up --build -d
 
 .PHONY: start-dev

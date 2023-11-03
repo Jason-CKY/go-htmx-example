@@ -8,7 +8,6 @@ services:
       dockerfile: ./build/Dockerfile
       target: dev
     container_name: htmx
-    working_dir: /app
     environment:
       directus_host: http://directus:8055
     ports:
