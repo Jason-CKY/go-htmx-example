@@ -8,6 +8,6 @@ import (
 )
 
 func HomePage(c echo.Context) error {
-	component := components.HomePage(5)
+	component := components.HomePage(4)
 	return component.Render(context.Background(), c.Response().Writer)
 }

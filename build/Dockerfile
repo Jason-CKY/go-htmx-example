@@ -26,12 +26,12 @@ RUN go install github.com/a-h/templ/cmd/templ@latest
 
 WORKDIR /app
 
-COPY ./src/app/go.mod ./
-COPY ./src/app/go.sum ./
+COPY ./go.mod ./
+COPY ./go.sum ./
 
 RUN go mod download
 
-COPY ./src/app ./
+COPY . ./
 COPY --from=build-css /output.css ./static/output.css
 
 RUN templ generate

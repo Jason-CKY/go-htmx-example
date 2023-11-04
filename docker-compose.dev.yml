@@ -13,7 +13,7 @@ services:
     ports:
       - 8080:8080
     volumes:
-      - ./src/app:/app
+      - .:/app
 
   directus:
     image: directus/directus:10.7.1

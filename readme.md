@@ -6,6 +6,8 @@
 * docker-compose (comes with docker-desktop, but can install [here](https://docs.docker.com/compose/install/standalone/) if you are not on windows)
 * [Node LTS v18](https://nodejs.org/en/download)
 * [Go v1.21](https://go.dev/doc/install)
+* [Air](https://github.com/cosmtrek/air)
+* [templ](https://github.com/a-h/templ)
 
 ## Features
 
@@ -18,23 +20,17 @@ https://github.com/Jason-CKY/go-htmx-example/assets/27609953/9519a6ea-a5e4-407d-
 * [SortableJS](https://github.com/SortableJS/Sortable) for drag and drop of tasks (sorting and updates)
 * [Directus](https://directus.io/) for headless CMS and API routes for CRUD operations
 
-## File structure
-
-* Root directory
-  * package.json/package-lock.json/prettier.json: npm dev dependencies to install prettier locally for vscode to format on save
-* src/app
-  * package.json/package-lock.json: npm dev dependencies to install tailwind and styling components required by tailwind
-  * tailwind.config.js: configuration files for tailwind
-  * input.css: input file to build tailwind css output file
-  * go.mod/go.sum: golang dependencies
-  * .air.toml: configuration for [air](https://github.com/cosmtrek/air)
-
 ## Quickstart (development mode)
 
 You can either start up using `docker-compose`:
 
 ```sh
-make install-deps build-dev
+# Run install-deps once to install all dev dependencies
+make install-deps 
+```
+
+```sh
+make build-dev
 # make sure directus is up on http://localhost:8055 before running migrations for directus
 make initialize-db
 ```
@@ -44,14 +40,14 @@ Or you can run locally with:
 ```sh
 # start directus
 docker-compose -f docker-compose.dev.yml start directus
+# make sure directus is up on http://localhost:8055 before running migrations for directus
+make initialize-db
 # install air
 go install github.com/cosmtrek/air@latest
 # install templ
 go install github.com/a-h/templ/cmd/templ@latest
-# start golang server
-make local-dev
-# make sure directus is up on http://localhost:8055 before running migrations for directus
-make initialize-db
+# start golang server with code reload using air
+air
 ```
 
 ## Format on save

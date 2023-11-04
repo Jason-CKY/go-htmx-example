@@ -1,4 +1,6 @@
-node_modules
 .vscode
-src/app/static/output.css
-src/app/pkg/views/*_templ.go
+node_modules
+tmp
+.git
+static/output.css
+pkg/views/*_templ.go
