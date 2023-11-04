@@ -39,7 +39,7 @@ Or you can run locally with:
 
 ```sh
 # start directus
-docker-compose -f docker-compose.dev.yml start directus
+docker-compose -f docker-compose.dev.yml up directus -d
 # make sure directus is up on http://localhost:8055 before running migrations for directus
 make initialize-db
 # install air

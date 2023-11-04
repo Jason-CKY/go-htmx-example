@@ -9,7 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var directusHost = ""
+var directusHost = "http://localhost:8055"
 
 func LookupEnvOrString(key string, defaultValue string) string {
 	envVariable, exists := os.LookupEnv(key)
