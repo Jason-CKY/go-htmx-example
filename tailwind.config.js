@@ -4,10 +4,9 @@ module.exports = {
   theme: {
     extend: {},
   },
-  darkMode: 'class',
+  darkMode: "class",
   plugins: [require("@tailwindcss/typography"), require("daisyui")],
   daisyui: {
     themes: ["garden", "dracula"],
   },
-}
-
+};
