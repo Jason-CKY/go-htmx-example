@@ -52,7 +52,11 @@ air
 
 ## Format on save
 
-Refer to this [link](https://www.digitalocean.com/community/tutorials/how-to-format-code-with-prettier-in-visual-studio-code) on how to install and set prettier to format on save.
+Add the following config into your vscode `settings.json` to enable format on save of a file in vscode:
+
+```json
+"editor.formatOnSave": true,
+```
 
 ## VS-code extensions for good developer experience
 
