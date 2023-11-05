@@ -13,7 +13,7 @@ templ TaskSingleton(task schemas.Task) {
 		<input type="hidden" name="task_ids" value={ task.Id }/>
 		<div class="card-body">
 			<div class="card-title justify-between mt-[0]">
-				<div class="flex place-items-center justify-between">
+				<div class="flex place-items-center">
 					<iconify-icon icon="fluent:drag-24-regular" class="my-handle cursor-pointer hover:rotate-45"></iconify-icon>
 					<iconify-icon
  						class="cursor-pointer hover:brightness-90 active:scale-[95%] active:brightness-90 mx-2"
@@ -24,9 +24,9 @@ templ TaskSingleton(task schemas.Task) {
 					></iconify-icon>
 					<article class="prose">
 						if task.Status == "done" {
-							<h2 class="line-through">{ task.Title }</h2>
+							<h2 class="line-through overflow-auto">{ task.Title }</h2>
 						} else {
-							<h2>{ task.Title }</h2>
+							<h2 class="whitespace-normal overflow-auto">{ task.Title }</h2>
 						}
 					</article>
 				</div>
@@ -40,9 +40,9 @@ templ TaskSingleton(task schemas.Task) {
 			</div>
 			<article class="prose">
 				if task.Status == "done" {
-					<p class="line-through">{ task.Description }</p>
+					<p class="line-through overflow-auto">{ task.Description }</p>
 				} else {
-					<p>{ task.Description }</p>
+					<p class="overflow-auto">{ task.Description }</p>
 				}
 			</article>
 		</div>

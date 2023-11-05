@@ -7,6 +7,7 @@ import (
 	"github.com/Jason-CKY/htmx-todo-app/pkg/components"
 	"github.com/Jason-CKY/htmx-todo-app/pkg/core"
 	"github.com/Jason-CKY/htmx-todo-app/pkg/schemas"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -39,6 +40,18 @@ func EditTaskView(c echo.Context) error {
 	task, err := core.GetTaskById(task_id)
 	if err != nil {
 		return err
+	}
+	component := components.EditTask(task)
+	return component.Render(context.Background(), c.Response().Writer)
+}
+
+func EmptyEditTaskView(c echo.Context) error {
+	task_status := c.Param("status")
+	task := schemas.Task{
+		Id:          uuid.New().String(),
+		Status:      task_status,
+		Title:       "",
+		Description: "",
 	}
 	component := components.EditTask(task)
 	return component.Render(context.Background(), c.Response().Writer)

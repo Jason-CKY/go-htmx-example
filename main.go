@@ -29,6 +29,7 @@ func main() {
 	e.Static("/static", "static")
 	e.GET("/", handlers.HomePage)
 	e.GET("/htmx", handlers.TasksView)
+	e.POST("/htmx/task/empty/:status", handlers.EmptyEditTaskView)
 	e.POST("/htmx/task/:id", handlers.EditTaskView)
 	e.DELETE("/htmx/task/:id", handlers.DeleteTaskView)
 	e.PUT("/htmx/task/:id", handlers.UpdateTaskView)

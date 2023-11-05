@@ -64,7 +64,7 @@ func GetTaskById(task_id string) (schemas.Task, *echo.HTTPError) {
 		return schemas.Task{}, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	if len(taskResponse["data"]) == 0 {
-		return schemas.Task{}, nil
+		return schemas.Task{}, echo.NewHTTPError(http.StatusNotFound, "task not found")
 	}
 
 	return taskResponse["data"][0], nil
