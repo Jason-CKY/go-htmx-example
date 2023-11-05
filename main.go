@@ -2,25 +2,22 @@ package main
 
 import (
 	"flag"
-	"os"
+	"fmt"
 
 	"github.com/Jason-CKY/htmx-todo-app/pkg/handlers"
+	"github.com/Jason-CKY/htmx-todo-app/pkg/utils"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
 
-var directusHost = "http://localhost:8055"
-
-func LookupEnvOrString(key string, defaultValue string) string {
-	envVariable, exists := os.LookupEnv(key)
-	if !exists {
-		return defaultValue
-	}
-	return envVariable
-}
+var (
+	directusHost = "http://localhost:8055"
+	webPort      = 8080
+)
 
 func main() {
-	flag.StringVar(&directusHost, "fpath", LookupEnvOrString("directus_host", directusHost), "Path to routing json file")
+	flag.StringVar(&directusHost, "fpath", utils.LookupEnvOrString("DIRECTUS_HOST", directusHost), "Path to routing json file")
+	flag.IntVar(&webPort, "port", utils.LookupEnvOrInt("PORT", webPort), "Port for echo web server")
 
 	flag.Parse()
 
@@ -35,6 +32,7 @@ func main() {
 	e := echo.New()
 	e.Static("/static", "static")
 	e.GET("/", handlers.HomePage)
+	e.GET("/htmx", handlers.TasksView)
 
-	e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%v", webPort)))
 }
