@@ -6,38 +6,6 @@ import (
 
 templ TaskView(backlog_tasks []schemas.Task, progress_tasks []schemas.Task, done_tasks []schemas.Task) {
 	<div class="mt-5 flex w-full">
-		<script>
-			htmx.onLoad(function (content) {
-				var sortables = document.querySelectorAll(".sortable");
-				for (var i = 0; i < sortables.length; i++) {
-					var sortable = sortables[i];
-					var sortableInstance = new Sortable(sortable, {
-						group: "shared",
-						animation: 150,
-						ghostClass: "blue-background-class",
-
-						// Make the `.htmx-indicator` unsortable
-						filter: ".htmx-indicator",
-						onMove: function (evt) {
-							return evt.related.className.indexOf("htmx-indicator") === -1;
-						},
-
-						// Disable sorting on the `end` event
-						onEnd: function (evt) {
-							if (evt.from !== evt.to) {
-							evt.to.dispatchEvent(evt);
-							}
-
-							this.option("disabled", true);
-						},
-					});
-					// Re-enable sorting on the `htmx:afterSwap` event
-					sortable.addEventListener("htmx:afterSwap", function () {
-						sortableInstance.option("disabled", false);
-					});
-				}
-			});
-		</script>
 		<div class="card rounded-box grid w-[30%] bg-base-300 p-2">
 			<div class="mx-2 flex flex-col">
 				<div class="flex items-center justify-between">

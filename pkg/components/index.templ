@@ -1,5 +1,39 @@
 package components
 
+script sortableOnLoad() {
+	htmx.onLoad(function (content) {
+		var sortables = document.querySelectorAll(".sortable");
+		for (var i = 0; i < sortables.length; i++) {
+			var sortable = sortables[i];
+			var sortableInstance = new Sortable(sortable, {
+				group: "shared",
+				animation: 150,
+				ghostClass: "blue-background-class",
+
+				// Make the `.htmx-indicator` unsortable
+				filter: ".htmx-indicator",
+				onMove: function (evt) {
+					return evt.related.className.indexOf("htmx-indicator") === -1;
+				},
+
+				// Disable sorting on the `end` event
+				onEnd: function (evt) {
+					if (evt.from !== evt.to) {
+					evt.to.dispatchEvent(evt);
+					}
+
+					this.option("disabled", true);
+				},
+			});
+			// Re-enable sorting on the `htmx:afterSwap` event
+			sortable.addEventListener("htmx:afterSwap", function () {
+				sortableInstance.option("disabled", false);
+			});
+		}
+	});
+
+}
+
 templ HomePage(numLoop int) {
 	<html id="webpage" data-theme="garden">
 		<head>
@@ -12,7 +46,7 @@ templ HomePage(numLoop int) {
 			<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 			<meta name="htmx-config" content="{&#34;includeIndicatorStyles&#34;: false}"/>
 		</head>
-		<body class="px-5 pt-2">
+		<body class="px-5 pt-2" onload={ sortableOnLoad() }>
 			<div class="flex items-center justify-between">
 				<article class="prose">
 					<h1 class="underline">My To-Do App</h1>
