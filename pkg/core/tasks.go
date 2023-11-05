@@ -1,42 +1,43 @@
 package core
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+
 	"github.com/Jason-CKY/htmx-todo-app/pkg/schemas"
-	log "github.com/sirupsen/logrus"
+	"github.com/labstack/echo/v4"
 )
 
-func GetTasks() ([]schemas.Task, []schemas.Task, []schemas.Task) {
-	// res, err := http.Get()
-	log.Info(DirectusHost)
-	backlogTaskList := []schemas.Task{
-		{
-			Id:          "1234",
-			Title:       "This is a test",
-			Description: "This is a test description",
-			Status:      "backlog",
-		},
-		{
-			Id:          "123674",
-			Title:       "This is a test",
-			Description: "This is a test description",
-			Status:      "backlog",
-		},
+func GetTasks() ([]schemas.Task, []schemas.Task, []schemas.Task, error) {
+	backlogTaskList, progressTaskList, doneTaskList := []schemas.Task{}, []schemas.Task{}, []schemas.Task{}
+	endpoint := fmt.Sprintf("%v/items/task", DirectusHost)
+	res, err := http.Get(endpoint)
+	// error handling for http request
+	if err != nil {
+		return backlogTaskList, progressTaskList, doneTaskList, echo.NewHTTPError(500, err.Error())
 	}
-	progressTaskList := []schemas.Task{
-		{
-			Id:          "5436",
-			Title:       "This is a test",
-			Description: "This is a test description",
-			Status:      "progress",
-		},
+	body, _ := io.ReadAll(res.Body)
+	// error handling for anything above 2xx response
+	if res.StatusCode > 299 {
+		return backlogTaskList, progressTaskList, doneTaskList, echo.NewHTTPError(res.StatusCode, string(body))
 	}
-	doneTaskList := []schemas.Task{
-		{
-			Id:          "7888",
-			Title:       "This is a test",
-			Description: "This is a test description",
-			Status:      "done",
-		},
+	var tasksResponse map[string][]schemas.Task
+	defer res.Body.Close()
+	err = json.Unmarshal(body, &tasksResponse)
+	// error handling for json unmarshaling
+	if err != nil {
+		return backlogTaskList, progressTaskList, doneTaskList, echo.NewHTTPError(500, err.Error())
 	}
-	return backlogTaskList, progressTaskList, doneTaskList
+	for _, task := range tasksResponse["data"] {
+		if task.Status == "backlog" {
+			backlogTaskList = append(backlogTaskList, task)
+		} else if task.Status == "progress" {
+			progressTaskList = append(progressTaskList, task)
+		} else {
+			doneTaskList = append(doneTaskList, task)
+		}
+	}
+	return backlogTaskList, progressTaskList, doneTaskList, nil
 }

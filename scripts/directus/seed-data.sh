@@ -6,7 +6,7 @@ ADMIN_ACCESS_TOKEN=$(curl -X POST -H "Content-Type: application/json" \
 # task table
 
 for i in {0..8}; do
-    DATA=$(cat src/directus/data.json | jq ".[$i]")
+    DATA=$(cat scripts/directus/data.json | jq ".[$i]")
     curl -X POST \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $ADMIN_ACCESS_TOKEN" \

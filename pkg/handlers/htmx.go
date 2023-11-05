@@ -14,7 +14,10 @@ func HomePage(c echo.Context) error {
 }
 
 func TasksView(c echo.Context) error {
-	backlogTaskList, progressTaskList, doneTaskList := core.GetTasks()
+	backlogTaskList, progressTaskList, doneTaskList, err := core.GetTasks()
+	if err != nil {
+		return err
+	}
 
 	component := components.TaskView(backlogTaskList, progressTaskList, doneTaskList)
 	return component.Render(context.Background(), c.Response().Writer)
