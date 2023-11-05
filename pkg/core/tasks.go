@@ -8,6 +8,7 @@ import (
 
 	"github.com/Jason-CKY/htmx-todo-app/pkg/schemas"
 	"github.com/labstack/echo/v4"
+	log "github.com/sirupsen/logrus"
 )
 
 func GetTasks() ([]schemas.Task, []schemas.Task, []schemas.Task, error) {
@@ -40,4 +41,26 @@ func GetTasks() ([]schemas.Task, []schemas.Task, []schemas.Task, error) {
 		}
 	}
 	return backlogTaskList, progressTaskList, doneTaskList, nil
+}
+
+func DeleteTaskById(task_id string) error {
+	log.Debugf("Deleting task id: %v...", task_id)
+	endpoint := fmt.Sprintf("%v/items/task/%v", DirectusHost, task_id)
+
+	req, err := http.NewRequest(http.MethodDelete, endpoint, nil)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	client := &http.Client{}
+	res, err := client.Do(req)
+	body, _ := io.ReadAll(res.Body)
+	defer res.Body.Close()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	if res.StatusCode != 204 {
+		return echo.NewHTTPError(res.StatusCode, string(body))
+	}
+
+	return nil
 }

@@ -29,6 +29,7 @@ func main() {
 	e.Static("/static", "static")
 	e.GET("/", handlers.HomePage)
 	e.GET("/htmx", handlers.TasksView)
+	e.DELETE("/htmx/task/:id", handlers.DeleteTaskView)
 
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%v", core.WebPort)))
 }

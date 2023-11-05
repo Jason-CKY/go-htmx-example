@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/Jason-CKY/htmx-todo-app/pkg/components"
 	"github.com/Jason-CKY/htmx-todo-app/pkg/core"
@@ -21,4 +22,13 @@ func TasksView(c echo.Context) error {
 
 	component := components.TaskView(backlogTaskList, progressTaskList, doneTaskList)
 	return component.Render(context.Background(), c.Response().Writer)
+}
+
+func DeleteTaskView(c echo.Context) error {
+	task_id := c.Param("id")
+	err := core.DeleteTaskById(task_id)
+	if err != nil {
+		return err
+	}
+	return c.String(http.StatusOK, "")
 }
