@@ -32,3 +32,26 @@ func DeleteTaskView(c echo.Context) error {
 	}
 	return c.String(http.StatusOK, "")
 }
+
+func CancelEditTaskView(c echo.Context) error {
+	task_id := c.Param("id")
+	task, err := core.GetTaskById(task_id)
+	if err != nil {
+		if err.Code == http.StatusNotFound {
+			return c.String(http.StatusOK, "")
+		}
+		return err
+	}
+	component := components.TaskSingleton(task)
+	return component.Render(context.Background(), c.Response().Writer)
+}
+
+func EditTaskView(c echo.Context) error {
+	task_id := c.Param("id")
+	task, err := core.GetTaskById(task_id)
+	if err != nil {
+		return err
+	}
+	component := components.EditTask(task)
+	return component.Render(context.Background(), c.Response().Writer)
+}
