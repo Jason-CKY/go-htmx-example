@@ -31,6 +31,7 @@ func main() {
 	e.GET("/htmx", handlers.TasksView)
 	e.POST("/htmx/task/:id", handlers.EditTaskView)
 	e.DELETE("/htmx/task/:id", handlers.DeleteTaskView)
+	e.PUT("/htmx/task/:id", handlers.UpdateTaskView)
 	e.DELETE("/htmx/task/cancel/:id", handlers.CancelEditTaskView)
 
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%v", core.WebPort)))

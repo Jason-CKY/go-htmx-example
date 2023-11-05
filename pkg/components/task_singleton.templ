@@ -14,8 +14,9 @@ templ TaskSingleton(task schemas.Task) {
 		<div class="card-body">
 			<div class="card-title justify-between mt-[0]">
 				<div class="flex place-items-center justify-between">
+					<iconify-icon icon="fluent:drag-24-regular" class="my-handle cursor-pointer hover:rotate-45"></iconify-icon>
 					<iconify-icon
- 						class="cursor-pointer hover:brightness-90 active:scale-[95%] active:brightness-90 mr-2"
+ 						class="cursor-pointer hover:brightness-90 active:scale-[95%] active:brightness-90 mx-2"
  						icon="iconamoon:edit-duotone"
  						hx-post={ fmt.Sprintf("/htmx/task/%v", task.Id) }
  						hx-target={ fmt.Sprintf("#card-%v", task.Id) }

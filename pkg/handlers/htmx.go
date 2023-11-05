@@ -6,6 +6,7 @@ import (
 
 	"github.com/Jason-CKY/htmx-todo-app/pkg/components"
 	"github.com/Jason-CKY/htmx-todo-app/pkg/core"
+	"github.com/Jason-CKY/htmx-todo-app/pkg/schemas"
 	"github.com/labstack/echo/v4"
 )
 
@@ -33,6 +34,16 @@ func DeleteTaskView(c echo.Context) error {
 	return c.String(http.StatusOK, "")
 }
 
+func EditTaskView(c echo.Context) error {
+	task_id := c.Param("id")
+	task, err := core.GetTaskById(task_id)
+	if err != nil {
+		return err
+	}
+	component := components.EditTask(task)
+	return component.Render(context.Background(), c.Response().Writer)
+}
+
 func CancelEditTaskView(c echo.Context) error {
 	task_id := c.Param("id")
 	task, err := core.GetTaskById(task_id)
@@ -46,12 +57,21 @@ func CancelEditTaskView(c echo.Context) error {
 	return component.Render(context.Background(), c.Response().Writer)
 }
 
-func EditTaskView(c echo.Context) error {
+func UpdateTaskView(c echo.Context) error {
 	task_id := c.Param("id")
-	task, err := core.GetTaskById(task_id)
+	status := c.FormValue("status")
+	title := c.FormValue("title")
+	description := c.FormValue("description")
+	new_task := schemas.Task{
+		Id:          task_id,
+		Title:       title,
+		Description: description,
+		Status:      status,
+	}
+	task, err := core.UpsertTask(new_task)
 	if err != nil {
 		return err
 	}
-	component := components.EditTask(task)
+	component := components.TaskSingleton(task)
 	return component.Render(context.Background(), c.Response().Writer)
 }

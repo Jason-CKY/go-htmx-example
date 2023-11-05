@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -89,4 +90,72 @@ func DeleteTaskById(task_id string) *echo.HTTPError {
 	}
 
 	return nil
+}
+
+func UpdateTask(task schemas.Task) (schemas.Task, *echo.HTTPError) {
+	endpoint := fmt.Sprintf("%v/items/task/%v", DirectusHost, task.Id)
+	reqBody, _ := json.Marshal(task)
+	req, err := http.NewRequest(http.MethodPatch, endpoint, bytes.NewReader(reqBody))
+	req.Header.Set("Content-Type", "application/json")
+	if err != nil {
+		return task, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return task, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+	if res.StatusCode != 200 {
+		return task, echo.NewHTTPError(res.StatusCode, string(body))
+	}
+	var taskResponse map[string]schemas.Task
+	err = json.Unmarshal(body, &taskResponse)
+	// error handling for json unmarshaling
+	if err != nil {
+		return task, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	return taskResponse["data"], nil
+}
+
+func CreateTask(task schemas.Task) (schemas.Task, *echo.HTTPError) {
+	endpoint := fmt.Sprintf("%v/items/task", DirectusHost)
+	reqBody, _ := json.Marshal(task)
+	req, err := http.NewRequest(http.MethodPost, endpoint, bytes.NewBuffer(reqBody))
+	req.Header.Set("Content-Type", "application/json")
+	if err != nil {
+		return task, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return task, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+	if res.StatusCode != 200 {
+		return task, echo.NewHTTPError(res.StatusCode, string(body))
+	}
+	var taskResponse map[string]schemas.Task
+	err = json.Unmarshal(body, &taskResponse)
+	// error handling for json unmarshaling
+	if err != nil {
+		return task, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return taskResponse["data"], nil
+}
+
+func UpsertTask(task schemas.Task) (schemas.Task, *echo.HTTPError) {
+	_, err := GetTaskById(task.Id)
+	if err != nil {
+		if err.Code == http.StatusNotFound {
+			newTask, err := CreateTask(task)
+			return newTask, err
+		}
+		return task, err
+	}
+	newTask, err := UpdateTask(task)
+	return newTask, err
 }
