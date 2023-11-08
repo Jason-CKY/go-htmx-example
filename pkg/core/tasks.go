@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
 
 	"github.com/Jason-CKY/htmx-todo-app/pkg/schemas"
 	"github.com/labstack/echo/v4"
@@ -172,22 +173,55 @@ func GetTasksInOrder() ([]schemas.Task, []schemas.Task, []schemas.Task, *echo.HT
 				doneTasks = append(doneTasks, task)
 			}
 		}
-		UpdateTaskSortByTasks("backlog", backlogTasks)
-		UpdateTaskSortByTasks("progress", progressTasks)
-		UpdateTaskSortByTasks("done", doneTasks)
+		var wg sync.WaitGroup
+		wg.Add(3)
+		go func(status string, tasks []schemas.Task) {
+			defer wg.Done()
+			UpdateTaskSortByTasks(status, tasks)
+		}("backlog", backlogTasks)
+		go func(status string, tasks []schemas.Task) {
+			defer wg.Done()
+			UpdateTaskSortByTasks(status, tasks)
+		}("progress", progressTasks)
+		go func(status string, tasks []schemas.Task) {
+			defer wg.Done()
+			UpdateTaskSortByTasks(status, tasks)
+		}("done", doneTasks)
+		wg.Wait()
 		return backlogTasks, progressTasks, doneTasks, nil
 
 	}
 
-	for _, taskId := range backlogTaskSort {
-		backlogTasks = append(backlogTasks, FilterTaskById(taskId, tasks))
-	}
-	for _, taskId := range progressTaskSort {
-		progressTasks = append(progressTasks, FilterTaskById(taskId, tasks))
-	}
-	for _, taskId := range doneTaskSort {
-		doneTasks = append(doneTasks, FilterTaskById(taskId, tasks))
-	}
+	backlogTaskChan := make(chan []schemas.Task)
+	progressTaskChan := make(chan []schemas.Task)
+	doneTaskChan := make(chan []schemas.Task)
+
+	go func(taskSort []string, tasks []schemas.Task) {
+		sortedTasks := []schemas.Task{}
+		for _, taskId := range backlogTaskSort {
+			sortedTasks = append(sortedTasks, FilterTaskById(taskId, tasks))
+		}
+		backlogTaskChan <- sortedTasks
+	}(backlogTaskSort, tasks)
+	go func(taskSort []string, tasks []schemas.Task) {
+		sortedTasks := []schemas.Task{}
+		for _, taskId := range backlogTaskSort {
+			sortedTasks = append(sortedTasks, FilterTaskById(taskId, tasks))
+		}
+		progressTaskChan <- sortedTasks
+	}(progressTaskSort, tasks)
+	go func(taskSort []string, tasks []schemas.Task) {
+		sortedTasks := []schemas.Task{}
+		for _, taskId := range backlogTaskSort {
+			sortedTasks = append(sortedTasks, FilterTaskById(taskId, tasks))
+		}
+		doneTaskChan <- sortedTasks
+	}(doneTaskSort, tasks)
+
+	backlogTasks = <-backlogTaskChan
+	progressTasks = <-progressTaskChan
+	doneTasks = <-doneTaskChan
+
 	return backlogTasks, progressTasks, doneTasks, nil
 }
 
