@@ -11,40 +11,45 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// GET /
 func HomePage(c echo.Context) error {
 	component := components.HomePage(4)
 	return component.Render(context.Background(), c.Response().Writer)
 }
 
+// GET /htmx
 func TasksView(c echo.Context) error {
-	backlogTaskList, progressTaskList, doneTaskList, err := core.GetTasksInOrder()
-	if err != nil {
-		return err
+	backlogTaskList, progressTaskList, doneTaskList, echoHTTPErr := core.GetTasksInOrder()
+	if echoHTTPErr != nil {
+		return echoHTTPErr
 	}
 
 	component := components.TaskView(backlogTaskList, progressTaskList, doneTaskList)
 	return component.Render(context.Background(), c.Response().Writer)
 }
 
+// DELETE /htmx/task/:id
 func DeleteTaskView(c echo.Context) error {
 	task_id := c.Param("id")
-	err := core.DeleteTaskById(task_id)
-	if err != nil {
-		return err
+	echoHTTPErr := core.DeleteTaskById(task_id)
+	if echoHTTPErr != nil {
+		return echoHTTPErr
 	}
 	return c.String(http.StatusOK, "")
 }
 
+// POST /htmx/task/:id
 func EditTaskView(c echo.Context) error {
 	task_id := c.Param("id")
-	task, err := core.GetTaskById(task_id)
-	if err != nil {
-		return err
+	task, echoHTTPErr := core.GetTaskById(task_id)
+	if echoHTTPErr != nil {
+		return echoHTTPErr
 	}
 	component := components.EditTask(task)
 	return component.Render(context.Background(), c.Response().Writer)
 }
 
+// POST /htmx/task/empty/:status
 func EmptyEditTaskView(c echo.Context) error {
 	task_status := c.Param("status")
 	task := schemas.Task{
@@ -57,19 +62,21 @@ func EmptyEditTaskView(c echo.Context) error {
 	return component.Render(context.Background(), c.Response().Writer)
 }
 
+// DELETE /htmx/task/cancel/:id
 func CancelEditTaskView(c echo.Context) error {
 	task_id := c.Param("id")
-	task, err := core.GetTaskById(task_id)
-	if err != nil {
-		if err.Code == http.StatusNotFound {
+	task, echoHTTPErr := core.GetTaskById(task_id)
+	if echoHTTPErr != nil {
+		if echoHTTPErr.Code == http.StatusNotFound {
 			return c.String(http.StatusOK, "")
 		}
-		return err
+		return echoHTTPErr
 	}
 	component := components.TaskSingleton(task)
 	return component.Render(context.Background(), c.Response().Writer)
 }
 
+// PUT /htmx/task/:id
 func UpdateTaskView(c echo.Context) error {
 	task_id := c.Param("id")
 	status := c.FormValue("status")
@@ -81,32 +88,33 @@ func UpdateTaskView(c echo.Context) error {
 		Description: description,
 		Status:      status,
 	}
-	task, err := core.UpsertTask(new_task)
-	if err != nil {
-		return err
+	task, echoHTTPErr := core.UpsertTask(new_task)
+	if echoHTTPErr != nil {
+		return echoHTTPErr
 	}
 	component := components.TaskSingleton(task)
 	return component.Render(context.Background(), c.Response().Writer)
 }
 
+// POST /htmx/sort/:status
 func SortTaskView(c echo.Context) error {
 	var sortTaskRequestParams schemas.SortTaskRequestParams
 	err := c.Bind(&sortTaskRequestParams)
 	if err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
-	taskSort, httpErr := core.GetTaskSortByStatus(sortTaskRequestParams.Status)
-	if httpErr != nil {
-		return httpErr
+	taskSort, echoHTTPErr := core.GetTaskSortByStatus(sortTaskRequestParams.Status)
+	if echoHTTPErr != nil {
+		return echoHTTPErr
 	}
 	taskSort.Sorting_order = sortTaskRequestParams.TaskIds
-	_, httpErr = core.UpdateTaskSort(taskSort)
-	if httpErr != nil {
-		return httpErr
+	_, echoHTTPErr = core.UpdateTaskSort(taskSort)
+	if echoHTTPErr != nil {
+		return echoHTTPErr
 	}
-	tasks, httpErr := core.UpdateTasksStatusById(sortTaskRequestParams.TaskIds, sortTaskRequestParams.Status)
-	if httpErr != nil {
-		return httpErr
+	tasks, echoHTTPErr := core.UpdateTasksStatusById(sortTaskRequestParams.TaskIds, sortTaskRequestParams.Status)
+	if echoHTTPErr != nil {
+		return echoHTTPErr
 	}
 
 	component := components.TaskList(tasks, sortTaskRequestParams.Status)
