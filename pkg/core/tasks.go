@@ -175,18 +175,13 @@ func GetTasksInOrder() ([]schemas.Task, []schemas.Task, []schemas.Task, *echo.HT
 		}
 		var wg sync.WaitGroup
 		wg.Add(3)
-		go func(status string, tasks []schemas.Task) {
+		goUpdateTaskSortByTasks := func(status string, tasks []schemas.Task) {
 			defer wg.Done()
 			UpdateTaskSortByTasks(status, tasks)
-		}("backlog", backlogTasks)
-		go func(status string, tasks []schemas.Task) {
-			defer wg.Done()
-			UpdateTaskSortByTasks(status, tasks)
-		}("progress", progressTasks)
-		go func(status string, tasks []schemas.Task) {
-			defer wg.Done()
-			UpdateTaskSortByTasks(status, tasks)
-		}("done", doneTasks)
+		}
+		go goUpdateTaskSortByTasks("backlog", backlogTasks)
+		go goUpdateTaskSortByTasks("progress", progressTasks)
+		go goUpdateTaskSortByTasks("done", doneTasks)
 		wg.Wait()
 		return backlogTasks, progressTasks, doneTasks, nil
 
@@ -195,28 +190,16 @@ func GetTasksInOrder() ([]schemas.Task, []schemas.Task, []schemas.Task, *echo.HT
 	backlogTaskChan := make(chan []schemas.Task)
 	progressTaskChan := make(chan []schemas.Task)
 	doneTaskChan := make(chan []schemas.Task)
-
-	go func(taskSort []string, tasks []schemas.Task) {
+	goUpdateTasksBySortingOrder := func(taskSort []string, tasks []schemas.Task, taskChan chan []schemas.Task) {
 		sortedTasks := []schemas.Task{}
-		for _, taskId := range backlogTaskSort {
+		for _, taskId := range taskSort {
 			sortedTasks = append(sortedTasks, FilterTaskById(taskId, tasks))
 		}
-		backlogTaskChan <- sortedTasks
-	}(backlogTaskSort, tasks)
-	go func(taskSort []string, tasks []schemas.Task) {
-		sortedTasks := []schemas.Task{}
-		for _, taskId := range backlogTaskSort {
-			sortedTasks = append(sortedTasks, FilterTaskById(taskId, tasks))
-		}
-		progressTaskChan <- sortedTasks
-	}(progressTaskSort, tasks)
-	go func(taskSort []string, tasks []schemas.Task) {
-		sortedTasks := []schemas.Task{}
-		for _, taskId := range backlogTaskSort {
-			sortedTasks = append(sortedTasks, FilterTaskById(taskId, tasks))
-		}
-		doneTaskChan <- sortedTasks
-	}(doneTaskSort, tasks)
+		taskChan <- sortedTasks
+	}
+	go goUpdateTasksBySortingOrder(backlogTaskSort, tasks, backlogTaskChan)
+	go goUpdateTasksBySortingOrder(progressTaskSort, tasks, progressTaskChan)
+	go goUpdateTasksBySortingOrder(doneTaskSort, tasks, doneTaskChan)
 
 	backlogTasks = <-backlogTaskChan
 	progressTasks = <-progressTaskChan
