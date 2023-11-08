@@ -286,6 +286,52 @@ func UpdateTask(task schemas.Task) (schemas.Task, *echo.HTTPError) {
 	return taskResponse["data"], nil
 }
 
+func UpdateTasksStatusById(task_ids []string, status string) ([]schemas.Task, *echo.HTTPError) {
+	endpoint := fmt.Sprintf("%v/items/task", DirectusHost)
+	data := map[string]interface{}{
+		"keys": task_ids,
+		"data": map[string]interface{}{
+			"status": status,
+		},
+	}
+	reqBody, err := json.Marshal(data)
+	if err != nil {
+		return []schemas.Task{}, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	req, err := http.NewRequest(http.MethodPatch, endpoint, bytes.NewReader(reqBody))
+	req.Header.Set("Content-Type", "application/json")
+	if err != nil {
+		return []schemas.Task{}, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return []schemas.Task{}, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+	if res.StatusCode != 200 {
+		return []schemas.Task{}, echo.NewHTTPError(res.StatusCode, string(body))
+	}
+	var taskResponse map[string][]schemas.Task
+	err = json.Unmarshal(body, &taskResponse)
+	// error handling for json unmarshaling
+	if err != nil {
+		return []schemas.Task{}, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	taskMapping := map[string]schemas.Task{}
+	for _, task := range taskResponse["data"] {
+		taskMapping[task.Id] = task
+	}
+	updatedTasks := []schemas.Task{}
+	for _, taskId := range task_ids {
+		updatedTasks = append(updatedTasks, taskMapping[taskId])
+	}
+	return updatedTasks, nil
+
+}
+
 func CreateTask(task schemas.Task) (schemas.Task, *echo.HTTPError) {
 	endpoint := fmt.Sprintf("%v/items/task", DirectusHost)
 	reqBody, _ := json.Marshal(task)

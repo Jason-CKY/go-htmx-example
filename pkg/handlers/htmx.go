@@ -88,3 +88,27 @@ func UpdateTaskView(c echo.Context) error {
 	component := components.TaskSingleton(task)
 	return component.Render(context.Background(), c.Response().Writer)
 }
+
+func SortTaskView(c echo.Context) error {
+	var sortTaskRequestParams schemas.SortTaskRequestParams
+	err := c.Bind(&sortTaskRequestParams)
+	if err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+	taskSort, httpErr := core.GetTaskSortByStatus(sortTaskRequestParams.Status)
+	if httpErr != nil {
+		return httpErr
+	}
+	taskSort.Sorting_order = sortTaskRequestParams.TaskIds
+	_, httpErr = core.UpdateTaskSort(taskSort)
+	if httpErr != nil {
+		return httpErr
+	}
+	tasks, httpErr := core.UpdateTasksStatusById(sortTaskRequestParams.TaskIds, sortTaskRequestParams.Status)
+	if httpErr != nil {
+		return httpErr
+	}
+
+	component := components.TaskList(tasks, sortTaskRequestParams.Status)
+	return component.Render(context.Background(), c.Response().Writer)
+}
