@@ -17,7 +17,7 @@ func HomePage(c echo.Context) error {
 }
 
 func TasksView(c echo.Context) error {
-	backlogTaskList, progressTaskList, doneTaskList, err := core.GetTasks()
+	backlogTaskList, progressTaskList, doneTaskList, err := core.GetTasksInOrder()
 	if err != nil {
 		return err
 	}
