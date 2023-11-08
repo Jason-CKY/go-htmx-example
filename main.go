@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	flag.StringVar(&core.DirectusHost, "fpath", utils.LookupEnvOrString("DIRECTUS_HOST", core.DirectusHost), "Path to routing json file")
+	flag.StringVar(&core.DirectusHost, "fpath", utils.LookupEnvOrString("DIRECTUS_HOST", core.DirectusHost), "Hostname for directus server")
 	flag.IntVar(&core.WebPort, "port", utils.LookupEnvOrInt("PORT", core.WebPort), "Port for echo web server")
 
 	flag.Parse()
